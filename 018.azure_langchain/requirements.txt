@@ -1,5 +1,5 @@
 openai 
-langchain
+langchain==0.0.146
 tiktoken
 faiss-cpu
-
+chromadb==0.3.21
