@@ -69,7 +69,6 @@ def init_chromadb():
     )
 
     embeddings = OpenAIEmbeddings(deployment="text-embedding-ada-002", chunk_size=1)
-    # embeddings = OpenAIEmbeddings()
 
     vectorstore = Chroma(
         collection_name="langchain_store",
@@ -80,6 +79,15 @@ def init_chromadb():
 
     documents = []
     for num, doc in enumerate(get_documents()):
+        doc.page_content = replace_newlines_and_spaces(doc.page_content)
+        documents.append(doc)
+
+    vectorstore.add_documents(documents=documents, embedding=embeddings)
+    vectorstore.persist()
+    print(vectorstore)
+
+    documents = []
+    for num, doc in enumerate(PyPDFLoader("data/shingikai.pdf").load()):
         doc.page_content = replace_newlines_and_spaces(doc.page_content)
         documents.append(doc)
 
@@ -110,7 +118,8 @@ def query_chromadb():
     retriever = vectorstore.as_retriever()
     qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever)
 
-    query = "web3とはなんですか？"
+    # query = "中長期のミッションステートメントは？"
+    query = "令和3年6月7日の消費経済審議会で何の話をしましたか？"
     result = qa.run(query)
 
     # result = vectorstore.similarity_search_with_score(query="web3とはなんですか？", k=1)
